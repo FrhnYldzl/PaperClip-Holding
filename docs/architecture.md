@@ -1,93 +1,84 @@
-# Paperclip Holding — Mimari
+# Paperclip Holding — Mimari (v2, clean slate)
 
 ## Vizyon
 
-**"Zero-human company"** felsefesiyle, 3 stratejik proje + ortak departmanlar tek Holding altında orkestre edilir. CEO ajan organizasyonu kurar, manager'lar departmanları yönetir, IC ajanlar gerçek işi yapar — tüm bu süreçte governance gate'leri ve token bütçesi disiplini insan kontrolünde kalır.
+Tek Holding altında tüm orkestrasyon. **Asset Factory dahil** her şey Paperclip primitive'leri (company/department/agent/routine/skill) üzerine kurulur. Federation/sister-service yok — tek motor, tek arayüz, tek dashboard.
+
+Çekirdek prensip: **Holding = "agency"**. Kendi internal asset'lerini (Asset Factory üretir) ve dış SaaS'lerin (Juris, Fevup, vb.) **sadece belirli alanlarını** (S&M öncelikle) servis eder. Dış SaaS'lerin ürün geliştirme/operasyonlarına dokunmaz.
 
 ## Org Chart
 
 ```
-              CEO
-       (executive direction)
-                │
-   ┌────────────┼────────────┐
-   │            │            │
-  COO          CMO          CFO
-   │            │            │
- owns         owns         owns
-projects'   project-     consolidated
-execution   agnostic       P&L &
-            S&M           budget
-            pipeline      tracking
+                  PAPERCLIP HOLDING
+                        │
+   ┌────────────────────┼─────────────────────────────────┐
+   │                    │                                  │
+EXECUTIVE          DEPARTMENTS                  PROJECT LIAISONS
+                                              (her external project için 1 ajan)
+CEO                CMO ─→ Sales & Marketing
+  governance       │      proje-agnostik            ┌─ Meridian Observer
+  board liaison    │      client-parametreli        │   → READ-ONLY observe
+                   ├── Researcher                   │
+COO                ├── Content Producer             ├─ Juris S&M Lead
+  exec ops         ├── Channel Distributor          │   → SADECE S&M
+  Asset Factory    ├── Lead Manager                 │
+  + project        └── Analytics                    ├─ Fevup S&M Lead
+  liaisons                                          │   → SADECE S&M
+  supervisor                                        │
+                   Asset Factory department         └─ <yeni SaaS> Lead
+CFO                ├── Allocator (CIO)
+  konsolide P&L    │   → AssetCandidate evaluate
+  budget cap       │
+  enforcement      └── Helmsman:<AssetName>
+                       (her onaylanan asset için
+                        hire — gereksiz idle yok)
 ```
 
-### Manager Sorumlulukları
+## 4 İlişki Türü (kritik — proje tasarlanırken hangi tür olduğu net olmalı)
 
-**COO** — Proje execution sahibi. 3 projenin "owner" şapkasını taşır:
-- Meridian Observer (read-only, hire edilecek)
-- Juris Operator (deploy + ops, hire edilecek)
-- Asset Factory Lead (creative pipeline, hire edilecek)
+| # | Tür | Örnek | Holding'in işi | Asla yapmayacağı |
+|---|---|---|---|---|
+| 1 | **🔵 Observe-only** | Meridian (trading) | Read-only veri çek, Equity & BTC ayrı konsolide, denetim raporu, mail/Telegram alarm | Pozisyon açma/kapama, broker'a komut, herhangi bir write — **forever** |
+| 2 | **🟣 Internal Asset** | Newsletter, FBA, Course, Affiliate (Asset Factory output) | Allocator değerlendirir → Helmsman operate eder → S&M departmanı dağıtır → CFO P&L konsolide eder | (yok — full ownership) |
+| 3 | **🟠 External SaaS — S&M only** | Juris (legal SaaS), Fevup (e-commerce/dropshipping), gelecek SaaS'ler | Sadece pazarlama, satış, içerik üretimi, trafik, lead pipeline, müşteri-talep analizi | Ürün geliştirme, deploy, support, contract review, kod tabanı yönetimi — **bunları SaaS sahibi kendi çözer** |
+| 4 | **🟡 External SaaS — full operator** | (şimdilik yok, ileride istenirse) | Her şey: deploy + sales + support + content + product ops + contract | (none) |
 
-**CMO** — **Proje-agnostik** Sales & Marketing departmanı. Kritik tasarım kararı: aynı pipeline (lead → araştırma → içerik → kanal → trafik → conversion → analytics) hem **iç projeler** (Juris, Asset Factory çıktıları) hem **dış mal/hizmet**ler için kullanılır. `client` parametresi ile ayrılır; brand voice, channels, audience, KPI client config'inde tutulur.
+> **Default ilişki türü = Observe-only veya S&M only.** Full operator yapısı yüksek bilişsel yük + yüksek risk → ancak iş değeri çok yüksek + ekip kapasitesi var ise seçilir.
 
-**CFO** — Konsolide finans. Aylık P&L, ajan başı budget cap, anormal harcama alarmı.
+## Ajan Hire Sırası
 
-## 3 Strategic Project
+1. **Manager katmanı** (Faz 1): COO, CMO, CFO — board approval, paralel
+2. **Asset Factory** (Faz 2): Allocator — board approval
+3. **Project Liaison** (Faz 3): Her external project için 1 ajan — board approval, paralel
+   - Meridian Observer
+   - Juris S&M Lead
+   - Fevup S&M Lead
+4. **IC ajanlar** (Faz 4): Sadece gerçek iş geldiğinde — Researcher/Content Producer/Lead Manager/Analytics, lazım oldukça hire
+5. **Helmsman per asset** (Faz 5+): Allocator'ın evaluate ettiği bir asset board tarafından onaylanınca, o asset için 1 Helmsman hire
 
-### 🟦 Meridian (read-only observer, FOREVER)
+## Governance & Budget
 
-**Dış sistem:** Railway-hosted webapp, AI-powered broker entegrasyonu, Gemini self-supervision ile otonom çalışan trading platformu.
+- `requireBoardApprovalForNewAgents=true` — her hire onaydan geçer
+- Manager başı aylık bütçe (öneri): $5-10
+- Departman IC'leri shared budget
+- Helmsman her asset için Mandate-bounded (Allocator önerir, board onaylar)
+- **Meridian read-only enforced** — kod + ajan talimatları + Holding governance, üç katmanda yazılı
+- **External SaaS S&M only** — liaison ajan'ı kendi SaaS'in product operations'ına dokunamaz; deny-by-default
 
-**Paperclip ilişkisi:** Sadece okuma. Ne pozisyon açar ne kapar. Görevi:
-- Equity portföy konsolidasyonu (günlük)
-- BTC portföy konsolidasyonu (günlük, ayrı)
-- Denetim raporu (CEO/CFO'ya)
-- Mail/Telegram bildirim
+## Ne Değişti (önceki versiyondan)
 
-**Kalıcı kural:** Meridian'a Paperclip'ten asla yazma yetkisi verilmez. Trading kritikliği sebebiyle çift kontrol mantığını bozmaz.
+- ❌ ~~"Juris back-office full operator"~~ → ✅ **Juris S&M only liaison**
+- ❌ ~~"Asset Factory ayrı sister service?"~~ → ✅ **Asset Factory Holding altında department**
+- ❌ ~~Matrix OS kodu rebuild~~ → ✅ **Matrix OS wisdom (doctrines + asset templates) Paperclip skill/memory'sine adapte**
+- ✅ **Yeni:** Project Liaison ajan paterni — her external project için tek temsilci ajan, ilişki türünü enforce eder
+- ✅ **Yeni:** Fevup ve gelecek SaaS'ler standart "S&M only liaison" kalıbıyla katılır
 
-### 🟪 Juris (back-office operator)
-
-**Dış sistem:** Railway'de kod hazır, canlı değil bir Legal SaaS (hukuk dikeyi).
-
-**Paperclip ilişkisi:** Operator. Ajanlar back-office'te:
-- Deploy + uptime + healthcheck
-- Sales pipeline (CMO departmanı tarafından)
-- Marketing içerik + SEO + trafik (CMO)
-- Customer support (CMO/COO)
-- Sözleşme inceleme — **cowork-style** (ajan hazırlar, insan onaylar)
-
-**Sınır:** Juris'in son kullanıcıları (avukatlar, hukuk firmaları) hâlâ insan. Ajanlar onların yerine geçmez.
-
-### 🟧 Asset Factory (internal digital asset pipeline)
-
-**İçeride bir department** — daha önce ayrı proje "The Matrix" idi, iptal edip Paperclip'e gömdük.
-
-**Pipeline:**
-```
-Concept Scout → Producer → QA → Distributor → Monetizer
-```
-
-**CMO'nun ilk internal "client"ı.** Asset Factory üretir, S&M departmanı dağıtır → kapalı döngü.
-
-## Cross-Cutting Departments
-
-CMO altındaki S&M departmanı IC ajanlar (Researcher, Content Producer, Channel Distributor, Lead Manager, Analytics) **lazım oldukça** hire edilir, idle department oluşmaz.
-
-## Governance & Bütçe
-
-- `requireBoardApprovalForNewAgents=true` (her hire onaydan geçer)
-- Manager başı aylık token cap (önerilen $5-10)
-- Departman başı IC token sharing
-- Meridian: read-only enforced kuralı (kod + ajan talimatlarında ayrı ayrı yazılı)
-- Juris contract review: cowork governance gate
-
-## Mimari Kararlar Loga
+## Mimari Karar Logu
 
 | Karar | Tarih | Sebep |
 |---|---|---|
-| Tek Holding instance, 3 proje | 2026-05-03 | Kullanıcı netleştirdi: tek arayüz/disiplin |
-| Meridian forever read-only | 2026-05-03 | Trading çift-kontrol mantığını koru |
-| The Matrix → Asset Factory department | 2026-05-03 | İçerde tutmak konsolidasyon sağlar |
-| S&M proje-agnostik | 2026-05-03 | "Mal/hizmet" pazarlanabilen herhangi bir client için |
-| GitHub + Railway deploy | 2026-05-03 | Lokal Windows ağrısından çıkış, 7/24 always-on |
+| Tek Holding (Asset Factory dahil) | 2026-05-03 | Kullanıcının tek-arayüz/tek-disiplin motivasyonuna sadık kalmak |
+| Asset Factory native, sister service değil | 2026-05-03 | Matrix OS wisdom transfer, kod rebuild değil; tek motor |
+| External SaaS default = S&M only | 2026-05-03 | Full operator yükü ürün ekibinin sorumluluğuna girer; agency paterni daha sağlıklı |
+| Project Liaison ajan paterni | 2026-05-03 | Her external project için tek noktada ilişki türü enforce edilir |
+| Helmsman lazım oldukça (idle yok) | 2026-05-03 | Maliyet disiplini + complexity azaltma |

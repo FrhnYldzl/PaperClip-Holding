@@ -2,23 +2,34 @@
 
 Bizim "zero-human company" orkestrasyon repomuz — [Paperclip](https://github.com/paperclipai/paperclip) üstüne kurulmuş, GitHub + Railway tabanlı.
 
-## Mimari Özet
+## Mimari Özet (v2 — clean slate)
 
-**Tek Holding instance, 3 strategic project + 4 manager:**
+**Tek Holding instance, 4 ilişki türü, Asset Factory dahil her şey içeride:**
 
 ```
 PAPERCLIP HOLDING
-├── CEO
-├── COO  ─→ owns 3 projects' execution
-├── CMO  ─→ proje-agnostik Sales & Marketing (client-parametreli)
-├── CFO  ─→ konsolide P&L + budget enforcement
-│
-├── Project: MERIDIAN        (read-only observer, FOREVER — trade için kalıcı kural)
-├── Project: JURIS           (back-office operate + cowork contract review)
-└── Project: ASSET FACTORY   (Matrix göçü — internal digital asset pipeline)
+├── EXEC: CEO + COO + CFO
+├── DEPT: CMO ─→ Sales & Marketing (proje-agnostik, client-parametreli)
+├── DEPT: Asset Factory ─→ Allocator (CIO) + Helmsman per asset
+└── PROJECT LIAISONS:
+    ├── 🔵 Meridian Observer       (READ-ONLY, trading observe)
+    ├── 🟠 Juris S&M Lead          (S&M only — Juris kendi back-office'i)
+    └── 🟠 Fevup S&M Lead          (S&M only)
 ```
 
-Detaylar: [`docs/architecture.md`](docs/architecture.md)
+**4 ilişki türü** her external project'le bağı net tanımlar — kafa karıştırmaz, kapsam-creep önler:
+
+| Tür | Holding'in işi | Örnek |
+|---|---|---|
+| 🔵 Observe-only | Veri çek, raporla, alarm | Meridian (trading) |
+| 🟣 Internal Asset | Asset Factory üretir, Helmsman operate eder | Newsletter / FBA / Course |
+| 🟠 External SaaS — S&M only | Sadece pazarlama+satış+içerik+trafik | Juris, Fevup |
+| 🟡 External SaaS — full operator | Her şey | (default değil, ileride istenirse) |
+
+Detaylar:
+- [`docs/architecture.md`](docs/architecture.md) — org chart + 4 ilişki türü
+- [`docs/asset-factory-doctrine.md`](docs/asset-factory-doctrine.md) — Allocator + Helmsman wisdom (Matrix OS adapte)
+- [`docs/project-relationship-types.md`](docs/project-relationship-types.md) — her tip için liaison template'i
 
 ## Bu Repo Ne İçerir?
 
