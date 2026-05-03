@@ -1,18 +1,40 @@
 #!/bin/sh
 # =====================================================================
-# Paperclip Holding — Container Start Script
+# Paperclip Holding — Container Start Script (self-bootstrapping)
 # =====================================================================
-# NOT: Bu script entrypoint.sh tarafından paperclip USER olarak çağrılır.
-# Direkt çağrılmamalı — entrypoint.sh root chown ön-koşulu sağlar.
-# Railway / Render / Fly / her container ortamında:
-#   1. Config yoksa onboard çalıştır (idempotent)
-#   2. config.json'u $PORT (default 8080) + 0.0.0.0 host + ALLOWED_HOSTNAME ile patch'le
-#   3. Paperclip server'ını başlat
+# Self-bootstrap: container root olarak başlasa bile bu script kendisini
+# paperclip user'a drop eder. Railway'in entrypoint override etmesinden
+# bağımsız çalışır.
 # =====================================================================
+
+# ---------------------------------------------------------------------
+# 0. SELF-BOOTSTRAP — root ise chown yap + paperclip user'a drop ol
+# ---------------------------------------------------------------------
+if [ "$(id -u)" = "0" ]; then
+    echo "[start.sh] Booted as root (uid=0) — performing privilege drop..."
+    DATA_DIR_FOR_CHOWN="${PAPERCLIP_DATA_DIR:-/home/paperclip/.paperclip}"
+    echo "[start.sh] chown -R paperclip:paperclip $DATA_DIR_FOR_CHOWN"
+    chown -R paperclip:paperclip "$DATA_DIR_FOR_CHOWN" 2>&1 | tail -3 || echo "[start.sh] WARN: chown $DATA_DIR_FOR_CHOWN failed"
+    echo "[start.sh] chown -R paperclip:paperclip /home/paperclip"
+    chown -R paperclip:paperclip /home/paperclip 2>&1 | tail -3 || echo "[start.sh] WARN: chown /home/paperclip failed"
+
+    if command -v gosu >/dev/null 2>&1; then
+        echo "[start.sh] exec gosu paperclip sh $0"
+        exec gosu paperclip sh "$0" "$@"
+    elif command -v su-exec >/dev/null 2>&1; then
+        echo "[start.sh] exec su-exec paperclip sh $0"
+        exec su-exec paperclip sh "$0" "$@"
+    else
+        echo "[start.sh] FATAL: neither gosu nor su-exec installed. Cannot drop privilege. Exiting."
+        exit 1
+    fi
+fi
+
+echo "[start.sh] Running as: $(whoami) (uid=$(id -u))"
 
 set -e
 
-# Derived env vars (entrypoint.sh bunları kendisi set etmiyor, derive et)
+# Derived env vars (boş ise default'tan üret)
 DATA_DIR="${PAPERCLIP_DATA_DIR:-/home/paperclip/.paperclip}"
 CONFIG_PATH="${CONFIG_PATH:-$DATA_DIR/instances/default/config.json}"
 EFFECTIVE_PORT="${EFFECTIVE_PORT:-${PORT:-8080}}"

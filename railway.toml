@@ -6,9 +6,9 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-# entrypoint.sh root olarak çalışır → volume chown → gosu ile paperclip user'a düşer → start.sh
-# (npm start de aynı entrypoint.sh'a yönlendirilmiş, package.json'da)
-startCommand = "sh bin/entrypoint.sh"
+# start.sh self-bootstrap eder: root ise chown + gosu ile paperclip'e drop, sonra
+# devam (entrypoint.sh artık opsiyonel — backward compat için duruyor)
+startCommand = "sh bin/start.sh"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 # Healthcheck disabled: Paperclip --bind lan auth-gate'liyor /api/health'i (403 Forbidden)
