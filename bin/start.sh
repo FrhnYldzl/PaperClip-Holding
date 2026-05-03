@@ -102,6 +102,20 @@ echo "[start.sh] Final config.json:"
 cat "$CONFIG_PATH" | head -40
 
 # ---------------------------------------------------------------------
+# 2b. Ek güvence — allowed-hostname CLI komutu (config patch'in fallback'i)
+# ---------------------------------------------------------------------
+if [ -n "$ALLOWED_HOSTNAME" ]; then
+    echo "[start.sh] Registering allowed hostnames via CLI..."
+    for HOST in $(echo "$ALLOWED_HOSTNAME" | tr ',' ' '); do
+        HOST=$(echo "$HOST" | tr -d ' ')
+        if [ -n "$HOST" ]; then
+            echo "[start.sh]   -> $HOST"
+            paperclipai allowed-hostname "$HOST" -d "$DATA_DIR" 2>&1 | tail -3 || echo "[start.sh] WARN: allowed-hostname '$HOST' failed (may already be registered)"
+        fi
+    done
+fi
+
+# ---------------------------------------------------------------------
 # 3. Bootstrap invite URL — her deploy'da banner ile log'a bas
 # ---------------------------------------------------------------------
 if [ -n "$ALLOWED_HOSTNAME" ]; then
