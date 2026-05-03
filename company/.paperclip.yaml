@@ -1,0 +1,79 @@
+schema: "paperclip/v1"
+agents:
+  ceo:
+    role: "ceo"
+    adapter:
+      config:
+        dangerouslySkipPermissions: true
+      type: "claude_local"
+    runtime:
+      heartbeat:
+        intervalSec: 300
+    permissions:
+      canCreateAgents: true
+  cfo:
+    role: "cfo"
+    icon: "database"
+    capabilities: "Consolidated financial reporting, monthly P&L, budget enforcement and alerting across all Paperclip Holding projects and departments."
+    adapter:
+      config:
+        dangerouslySkipPermissions: true
+      type: "claude_local"
+    runtime:
+      heartbeat:
+        maxConcurrentRuns: 3
+  cmo:
+    role: "cmo"
+    icon: "sparkles"
+    capabilities: "Runs Sales & Marketing as a project-agnostic department with client parameter. Current clients: Juris, Asset Factory outputs. Pipeline: brand, content, distribution, leads, analytics."
+    adapter:
+      config:
+        dangerouslySkipPermissions: true
+      type: "claude_local"
+    runtime:
+      heartbeat:
+        maxConcurrentRuns: 3
+  coo:
+    role: "general"
+    icon: "target"
+    capabilities: "Owns project execution across Meridian (read-only), Juris, and Asset Factory. Manages IC managers. Enforces Meridian read-only boundary permanently."
+    adapter:
+      config:
+        dangerouslySkipPermissions: true
+      type: "claude_local"
+    runtime:
+      heartbeat:
+        maxConcurrentRuns: 3
+  cto:
+    role: "cto"
+    icon: "cpu"
+    capabilities: "Owns technical roadmap, architecture, and engineering execution; manages IC coders and QA; delegates all code, bugs, features, infra, and devtools tasks across company projects."
+    adapter:
+      config:
+        dangerouslySkipPermissions: true
+      type: "claude_local"
+    runtime:
+      heartbeat:
+        maxConcurrentRuns: 3
+  uxdesigner:
+    role: "designer"
+    icon: "gem"
+    capabilities: "Owns product UX strategy, interaction design, user research, and design-system quality across Paperclip Holding."
+    adapter:
+      config:
+        dangerouslySkipPermissions: true
+      type: "claude_local"
+    runtime:
+      heartbeat:
+        maxConcurrentRuns: 3
+company:
+  attachmentMaxBytes: 10485760
+  requireBoardApprovalForNewAgents: true
+sidebar:
+  agents:
+    - "ceo"
+    - "cfo"
+    - "cmo"
+    - "coo"
+    - "cto"
+    - "uxdesigner"

@@ -1,0 +1,23 @@
+@echo off
+REM ====================================================================
+REM Claude Code CLI Wrapper — Paperclip subprocess'i icin
+REM ====================================================================
+REM Bu dosyayi C:\pcbin\claude.cmd olarak kopyala (boslukla yola koymaaa!)
+REM ve PATH'in basina C:\pcbin ekle:
+REM
+REM   set PATH=C:\pcbin;%%PATH%%
+REM
+REM Niye gerekli:
+REM   1. ANTHROPIC_API_KEY env var'i Paperclip subprocess'lerine gecmiyor;
+REM      wrapper bunu enjekte ediyor.
+REM   2. Real claude.cmd boslukli yolda (FERHAN YILDIZLI gibi);
+REM      wrapper FERHAN~1 8.3 short-name kullanarak bypass ediyor.
+REM
+REM Olusturma adimlari:
+REM   - YOUR-API-KEY-HERE'i Anthropic Console'dan aldigin gercek key ile degistir
+REM   - YOUR-8.3-USERNAME'i kendi user profilinin 8.3 kisa adiyla degistir
+REM     (cmd: dir /X C:\Users  -> kisa adi gosterir)
+REM ====================================================================
+
+set "ANTHROPIC_API_KEY=YOUR-API-KEY-HERE"
+"C:\Users\YOUR-8.3-USERNAME\AppData\Roaming\npm\claude.cmd" %*

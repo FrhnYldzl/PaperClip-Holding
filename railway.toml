@@ -1,0 +1,23 @@
+# Railway service config for Paperclip Holding
+# https://docs.railway.app/reference/config-as-code
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "npm start"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
+
+# Environment variables — these MUST be set in Railway dashboard, not committed:
+#   ANTHROPIC_API_KEY  - Anthropic Console API key (kredi yüklü olsun)
+#   AUTH_SECRET        - openssl rand -hex 32 ile yarat
+#   DATABASE_URL       - Railway Postgres add-on otomatik sağlar
+#   BIND               - "lan" production için
+#   ALLOWED_HOSTNAME   - Railway custom/auto domain (ör. paperclip-holding.up.railway.app)
+#   PORT               - Railway otomatik atar; Paperclip $PORT'u okur
+
+# Volume for persistent Paperclip data (~/.paperclip)
+# Railway dashboard'dan Volume mount: /root/.paperclip → 1GB minimum
