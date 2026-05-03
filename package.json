@@ -4,7 +4,7 @@
   "private": true,
   "description": "Paperclip Holding — zero-human company orchestration on Paperclip platform. Manages Meridian (trading, read-only), Juris (legal SaaS), Asset Factory (digital assets).",
   "scripts": {
-    "start": "CONFIG_PATH=${PAPERCLIP_DATA_DIR:-/root/.paperclip}/instances/default/config.json EFFECTIVE_PORT=${PORT:-8080} sh bin/start.sh",
+    "start": "sh bin/entrypoint.sh",
     "onboard": "paperclipai onboard --yes --bind lan",
     "run-only": "paperclipai run --bind lan",
     "company:import": "paperclipai company import ./company --target new --yes",

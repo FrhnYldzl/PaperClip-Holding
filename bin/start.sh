@@ -2,7 +2,9 @@
 # =====================================================================
 # Paperclip Holding — Container Start Script
 # =====================================================================
-# Railway / Render / Fly / her container ortamında doğru çalışsın diye:
+# NOT: Bu script entrypoint.sh tarafından paperclip USER olarak çağrılır.
+# Direkt çağrılmamalı — entrypoint.sh root chown ön-koşulu sağlar.
+# Railway / Render / Fly / her container ortamında:
 #   1. Config yoksa onboard çalıştır (idempotent)
 #   2. config.json'u $PORT (default 8080) + 0.0.0.0 host + ALLOWED_HOSTNAME ile patch'le
 #   3. Paperclip server'ını başlat
@@ -10,7 +12,11 @@
 
 set -e
 
-DATA_DIR="${PAPERCLIP_DATA_DIR:-/root/.paperclip}"
+# Derived env vars (entrypoint.sh bunları kendisi set etmiyor, derive et)
+DATA_DIR="${PAPERCLIP_DATA_DIR:-/home/paperclip/.paperclip}"
+CONFIG_PATH="${CONFIG_PATH:-$DATA_DIR/instances/default/config.json}"
+EFFECTIVE_PORT="${EFFECTIVE_PORT:-${PORT:-8080}}"
+export DATA_DIR CONFIG_PATH EFFECTIVE_PORT
 INSTANCE_DIR="$DATA_DIR/instances/default"
 CONFIG_PATH="$INSTANCE_DIR/config.json"
 
