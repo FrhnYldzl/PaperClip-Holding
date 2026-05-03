@@ -11,7 +11,8 @@
     "company:export": "paperclipai company export ${COMPANY_ID} --out ./company"
   },
   "dependencies": {
-    "paperclipai": "*"
+    "paperclipai": "*",
+    "@anthropic-ai/claude-code": "*"
   },
   "engines": {
     "node": ">=20"

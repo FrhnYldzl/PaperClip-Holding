@@ -17,6 +17,9 @@ CONFIG_PATH="$INSTANCE_DIR/config.json"
 # Railway default = 8080. Container env'de PORT zorunlu olarak var olmayabilir.
 EFFECTIVE_PORT="${PORT:-8080}"
 
+# Make node_modules/.bin available so 'claude' (from @anthropic-ai/claude-code dep) is in PATH
+export PATH="$(pwd)/node_modules/.bin:$PATH"
+
 echo "=================================================================="
 echo "[start.sh] Paperclip Holding — boot script"
 echo "[start.sh] Data dir:       $DATA_DIR"
@@ -27,6 +30,11 @@ echo "[start.sh] ALLOWED_HOSTNAME: ${ALLOWED_HOSTNAME:-(not set)}"
 echo "[start.sh] DATABASE_URL set: $([ -n "$DATABASE_URL" ] && echo yes || echo no)"
 echo "[start.sh] ANTHROPIC_API_KEY set: $([ -n "$ANTHROPIC_API_KEY" ] && echo yes || echo no)"
 echo "[start.sh] AUTH_SECRET set: $([ -n "$AUTH_SECRET" ] && echo yes || echo no)"
+if command -v claude > /dev/null 2>&1; then
+    echo "[start.sh] claude CLI:    $(claude --version 2>/dev/null | head -1) at $(command -v claude)"
+else
+    echo "[start.sh] claude CLI:    NOT FOUND — CEO heartbeat will fail; check @anthropic-ai/claude-code dep installed"
+fi
 echo "=================================================================="
 
 # ---------------------------------------------------------------------
