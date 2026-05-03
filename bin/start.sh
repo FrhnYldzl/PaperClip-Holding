@@ -50,13 +50,15 @@ const fs = require('fs');
 const path = process.env.CONFIG_PATH;
 const config = JSON.parse(fs.readFileSync(path, 'utf8'));
 
-// Cloud deployment için zorunlu ayarlar
+// Server settings for cloud deployment
+config.server = config.server || {};
 config.server.host = '0.0.0.0';
 config.server.port = parseInt(process.env.EFFECTIVE_PORT, 10);
 config.server.bind = 'lan';
 config.server.exposure = 'public';
 
-// Allowed hostnames listesini güncelle
+// Allowed hostnames + auth public URL (zorunlu — public exposure'da)
+let firstHost = null;
 if (process.env.ALLOWED_HOSTNAME) {
     config.server.allowedHostnames = config.server.allowedHostnames || [];
     const hosts = process.env.ALLOWED_HOSTNAME.split(',').map(s => s.trim()).filter(Boolean);
@@ -65,16 +67,26 @@ if (process.env.ALLOWED_HOSTNAME) {
             config.server.allowedHostnames.push(h);
         }
     }
+    firstHost = hosts[0];
+}
+
+// Auth config — public exposure için publicBaseUrl ZORUNLU (yoksa server crash)
+config.auth = config.auth || {};
+if (firstHost) {
+    config.auth.baseUrlMode = 'explicit';
+    config.auth.publicBaseUrl = 'https://' + firstHost;
 }
 
 fs.writeFileSync(path, JSON.stringify(config, null, 2));
 console.log('[patch] Config updated:');
-console.log('[patch]   host:', config.server.host);
-console.log('[patch]   port:', config.server.port);
-console.log('[patch]   bind:', config.server.bind);
-console.log('[patch]   exposure:', config.server.exposure);
-console.log('[patch]   deploymentMode:', config.server.deploymentMode);
-console.log('[patch]   allowedHostnames:', JSON.stringify(config.server.allowedHostnames));
+console.log('[patch]   server.host:           ', config.server.host);
+console.log('[patch]   server.port:           ', config.server.port);
+console.log('[patch]   server.bind:           ', config.server.bind);
+console.log('[patch]   server.exposure:       ', config.server.exposure);
+console.log('[patch]   server.deploymentMode: ', config.server.deploymentMode);
+console.log('[patch]   server.allowedHostnames:', JSON.stringify(config.server.allowedHostnames));
+console.log('[patch]   auth.baseUrlMode:      ', config.auth.baseUrlMode);
+console.log('[patch]   auth.publicBaseUrl:    ', config.auth.publicBaseUrl);
 "
 
 echo "[start.sh] Final config.json:"
