@@ -12,8 +12,11 @@ builder = "NIXPACKS"
 startCommand = "npm start"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
-healthcheckPath = "/api/health"
-healthcheckTimeout = 300
+# Healthcheck disabled: Paperclip --bind lan auth-gate'liyor /api/health'i (403 Forbidden)
+# Railway healthcheck unauth, sürekli fail eder → deploy "unhealthy" sayılır → traffic switch yapılmaz.
+# Process restart policy yeterli; ileride Paperclip public /health endpoint sağlarsa açılır.
+# healthcheckPath = "/api/health"
+# healthcheckTimeout = 300
 
 # Environment variables — these MUST be set in Railway dashboard, not committed:
 #   ANTHROPIC_API_KEY  - Anthropic Console API key (kredi yüklü olsun)
