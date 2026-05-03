@@ -1,44 +1,55 @@
 # =====================================================================
-# Paperclip Holding — Production Dockerfile (non-root user)
+# Paperclip Holding — Production Dockerfile
 # =====================================================================
-# Why non-root:
-#   Claude Code CLI (used by paperclipai claude_local adapter) refuses
-#   to run with --dangerously-skip-permissions as root for security.
-#   Railway containers run as root by default, so we explicitly switch
-#   to a 'paperclip' user.
+# Architecture:
+#   1. Container starts as root (entrypoint runs)
+#   2. entrypoint.sh chowns volume mount + drops to paperclip user
+#   3. start.sh runs as paperclip → onboard + config patch + run server
+#
+# Why non-root paperclip user:
+#   Claude Code CLI refuses --dangerously-skip-permissions as root for
+#   security. Paperclip's claude_local adapter passes this flag, so we
+#   must run as a non-root user.
+#
+# Why entrypoint w/ chown:
+#   Railway volumes mount as root:root by default. paperclip user can't
+#   write there without ownership fix. entrypoint.sh handles this once
+#   per boot, idempotent.
 # =====================================================================
 
 FROM node:20-slim
 
-# System deps for paperclipai + embedded Postgres fallback (in case Postgres is down)
+# System deps:
+#   - ca-certificates, curl: HTTPS, debugging
+#   - gosu: privilege drop in entrypoint (https://github.com/tianon/gosu)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
+    gosu \
   && rm -rf /var/lib/apt/lists/*
 
-# Global install — runs as root before switching user
+# Global tooling — Paperclip + Claude Code CLI
 RUN npm install -g paperclipai @anthropic-ai/claude-code
 
-# Create non-root user with home dir
+# Non-root user (Claude CLI requirement)
 RUN useradd -m -d /home/paperclip -s /bin/bash paperclip
 
-# Create data dir owned by paperclip user (for volume mount)
-RUN mkdir -p /home/paperclip/.paperclip && chown -R paperclip:paperclip /home/paperclip
+# Pre-create paperclip data dir (will be overlaid by volume mount at runtime)
+RUN mkdir -p /home/paperclip/.paperclip \
+  && chown -R paperclip:paperclip /home/paperclip
 
-# App workspace
+# App code
 WORKDIR /app
-COPY --chown=paperclip:paperclip . .
+COPY . .
+RUN chmod +x bin/entrypoint.sh bin/start.sh 2>/dev/null || true
 
-# Switch to non-root user
-USER paperclip
-
-# Environment for runtime
+# Runtime env
 ENV HOME=/home/paperclip
 ENV PAPERCLIP_DATA_DIR=/home/paperclip/.paperclip
 ENV NODE_ENV=production
 
-# Railway provides $PORT (default 8080)
+# Railway provides $PORT (defaults to 8080 in start.sh)
 EXPOSE 8080
 
-# Boot via our start script (onboard + config patch + invite + run)
-CMD ["sh", "bin/start.sh"]
+# Container starts as root → entrypoint chowns volume → drops to paperclip
+ENTRYPOINT ["sh", "/app/bin/entrypoint.sh"]
