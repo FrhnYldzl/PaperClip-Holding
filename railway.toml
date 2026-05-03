@@ -5,6 +5,8 @@
 builder = "NIXPACKS"
 
 [deploy]
+# npm start = paperclipai onboard --yes --bind lan && paperclipai run --bind lan
+# (onboard idempotent — sonraki restart'larda mevcut config'i tanır, atlar)
 startCommand = "npm start"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
