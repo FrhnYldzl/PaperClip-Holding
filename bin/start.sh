@@ -68,14 +68,23 @@ echo "=================================================================="
 
 # ---------------------------------------------------------------------
 # 1. Onboard (idempotent — mevcut config'e dokunmaz)
+# Plus stale path detection: eğer config /root/.paperclip içeriyorsa
+# (onboard root user iken çalıştırıldığında oluşur) backup'la ve yeniden
+# onboard çalıştır — paperclip user yazamaz o path'lere.
 # ---------------------------------------------------------------------
 mkdir -p "$INSTANCE_DIR"
+if [ -f "$CONFIG_PATH" ] && grep -q '"/root/.paperclip' "$CONFIG_PATH" 2>/dev/null; then
+    echo "[start.sh] STALE config detected (contains /root/.paperclip paths)"
+    echo "[start.sh] Backing up to ${CONFIG_PATH}.stale and forcing re-onboard"
+    mv "$CONFIG_PATH" "${CONFIG_PATH}.stale" 2>&1 || rm -f "$CONFIG_PATH"
+fi
+
 if [ ! -f "$CONFIG_PATH" ]; then
     echo "[start.sh] No config found at $CONFIG_PATH — running onboard..."
-    paperclipai onboard --yes --bind lan
+    paperclipai onboard --yes --bind lan -d "$DATA_DIR"
     echo "[start.sh] Onboard done."
 else
-    echo "[start.sh] Config exists, skipping onboard."
+    echo "[start.sh] Config exists at $CONFIG_PATH, skipping onboard."
 fi
 
 # ---------------------------------------------------------------------
@@ -86,6 +95,29 @@ node -e "
 const fs = require('fs');
 const path = process.env.CONFIG_PATH;
 const config = JSON.parse(fs.readFileSync(path, 'utf8'));
+
+// Path rewrite: eski /root/.paperclip path'lerini current $DATA_DIR'a çevir
+const newPrefix = process.env.DATA_DIR || process.env.PAPERCLIP_DATA_DIR || '/home/paperclip/.paperclip';
+const oldPrefixes = ['/root/.paperclip', '/root/paperclip'];
+function fixPath(p) {
+    if (typeof p !== 'string') return p;
+    for (const old of oldPrefixes) {
+        if (p.startsWith(old)) return newPrefix + p.slice(old.length);
+    }
+    return p;
+}
+function fixDeep(obj) {
+    if (Array.isArray(obj)) return obj.map(fixDeep);
+    if (obj && typeof obj === 'object') {
+        const out = {};
+        for (const k in obj) out[k] = fixDeep(obj[k]);
+        return out;
+    }
+    if (typeof obj === 'string') return fixPath(obj);
+    return obj;
+}
+const fixed = fixDeep(config);
+Object.assign(config, fixed);
 
 // Server settings for cloud deployment
 config.server = config.server || {};
