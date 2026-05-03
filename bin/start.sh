@@ -86,6 +86,12 @@ if (firstHost) {
     config.auth.publicBaseUrl = 'https://' + firstHost;
 }
 
+// Telemetry kapalı — production private data için Paperclip team'ine
+// anonim kullanım istatistiği gönderilmez (banka/müşteri verisi zaten asla
+// gitmiyordu, ama kapsamı dar tutmak prensibi)
+config.telemetry = config.telemetry || {};
+config.telemetry.enabled = false;
+
 fs.writeFileSync(path, JSON.stringify(config, null, 2));
 console.log('[patch] Config updated:');
 console.log('[patch]   server.host:           ', config.server.host);
