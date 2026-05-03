@@ -93,7 +93,26 @@ echo "[start.sh] Final config.json:"
 cat "$CONFIG_PATH" | head -40
 
 # ---------------------------------------------------------------------
-# 3. Paperclip server'ı başlat
+# 3. Bootstrap invite URL — her deploy'da banner ile log'a bas
+# ---------------------------------------------------------------------
+if [ -n "$ALLOWED_HOSTNAME" ]; then
+    FIRST_HOST=$(echo "$ALLOWED_HOSTNAME" | cut -d',' -f1 | tr -d ' ')
+    BASE_URL="https://$FIRST_HOST"
+    echo ""
+    echo "=================================================================="
+    echo "=================================================================="
+    echo "===            BOOTSTRAP INVITE URL                            ==="
+    echo "===  (yeni invite üretiliyor, eski varsa rotate olur)          ==="
+    echo "=================================================================="
+    paperclipai auth bootstrap-ceo --base-url "$BASE_URL" -d "$DATA_DIR" --force 2>&1 || echo "[start.sh] WARN: bootstrap-ceo failed (admin var olabilir, normal)"
+    echo "=================================================================="
+    echo "===            URL YUKARIDA — KOPYALAYIP TARAYICIYA            ==="
+    echo "=================================================================="
+    echo ""
+fi
+
+# ---------------------------------------------------------------------
+# 4. Paperclip server'ı başlat
 # ---------------------------------------------------------------------
 echo "=================================================================="
 echo "[start.sh] Starting Paperclip server (paperclipai run --bind lan)..."
