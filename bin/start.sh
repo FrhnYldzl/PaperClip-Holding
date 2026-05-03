@@ -17,8 +17,9 @@ CONFIG_PATH="$INSTANCE_DIR/config.json"
 # Railway default = 8080. Container env'de PORT zorunlu olarak var olmayabilir.
 EFFECTIVE_PORT="${PORT:-8080}"
 
-# Make node_modules/.bin available so 'claude' (from @anthropic-ai/claude-code dep) is in PATH
-export PATH="$(pwd)/node_modules/.bin:$PATH"
+# Dockerfile installs paperclipai + @anthropic-ai/claude-code globally;
+# fallback PATH export covers nixpacks/local builds where they're in node_modules
+export PATH="/usr/local/bin:$(pwd)/node_modules/.bin:$PATH"
 
 echo "=================================================================="
 echo "[start.sh] Paperclip Holding — boot script"

@@ -10,6 +10,7 @@
     "company:import": "paperclipai company import ./company --target new --yes",
     "company:export": "paperclipai company export ${COMPANY_ID} --out ./company"
   },
+  "//comments-deps": "Both paperclipai and @anthropic-ai/claude-code are installed globally in Dockerfile (npm install -g) — kept here only for local dev / IDE awareness; actual runtime uses Dockerfile global install for predictable PATH",
   "dependencies": {
     "paperclipai": "*",
     "@anthropic-ai/claude-code": "*"
