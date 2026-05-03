@@ -67,6 +67,24 @@ if (process.env.ALLOWED_HOSTNAME) {
     }
 }
 
+// Auth config — required when deploymentMode=authenticated and exposure=public
+config.auth = config.auth || {};
+config.auth.baseUrlMode = 'explicit';
+
+// Derive publicBaseUrl from environment
+let publicBaseUrl = 'http://localhost:8080';
+if (process.env.ALLOWED_HOSTNAME) {
+    const firstHost = process.env.ALLOWED_HOSTNAME.split(',')[0].trim();
+    if (firstHost) publicBaseUrl = firstHost;
+} else if (process.env.RAILWAY_PUBLIC_DOMAIN) {
+    publicBaseUrl = process.env.RAILWAY_PUBLIC_DOMAIN;
+}
+// Prepend https:// if no scheme is present
+if (!/^https?:\/\//i.test(publicBaseUrl)) {
+    publicBaseUrl = 'https://' + publicBaseUrl;
+}
+config.auth.publicBaseUrl = publicBaseUrl;
+
 fs.writeFileSync(path, JSON.stringify(config, null, 2));
 console.log('[patch] Config updated:');
 console.log('[patch]   host:', config.server.host);
@@ -75,6 +93,8 @@ console.log('[patch]   bind:', config.server.bind);
 console.log('[patch]   exposure:', config.server.exposure);
 console.log('[patch]   deploymentMode:', config.server.deploymentMode);
 console.log('[patch]   allowedHostnames:', JSON.stringify(config.server.allowedHostnames));
+console.log('[patch]   auth.baseUrlMode:', config.auth.baseUrlMode);
+console.log('[patch]   auth.publicBaseUrl:', config.auth.publicBaseUrl);
 "
 
 echo "[start.sh] Final config.json:"
