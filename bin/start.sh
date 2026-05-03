@@ -171,15 +171,27 @@ cat "$CONFIG_PATH" | head -40
 # 2b. Ek güvence — allowed-hostname CLI komutu (config patch'in fallback'i)
 # ---------------------------------------------------------------------
 if [ -n "$ALLOWED_HOSTNAME" ]; then
-    echo "[start.sh] Registering allowed hostnames via CLI..."
+    echo "=================================================================="
+    echo "[start.sh] Registering allowed hostnames via CLI (FULL OUTPUT):"
+    echo "=================================================================="
     for HOST in $(echo "$ALLOWED_HOSTNAME" | tr ',' ' '); do
         HOST=$(echo "$HOST" | tr -d ' ')
         if [ -n "$HOST" ]; then
-            echo "[start.sh]   -> $HOST"
-            paperclipai allowed-hostname "$HOST" -d "$DATA_DIR" 2>&1 | tail -3 || echo "[start.sh] WARN: allowed-hostname '$HOST' failed (may already be registered)"
+            echo "[start.sh] >>> paperclipai allowed-hostname \"$HOST\" -d \"$DATA_DIR\""
+            paperclipai allowed-hostname "$HOST" -d "$DATA_DIR" 2>&1 || echo "[start.sh] !!! allowed-hostname EXIT CODE: $?"
+            echo "[start.sh] <<< done"
         fi
     done
+    echo "=================================================================="
 fi
+
+# Ek diagnostic: hangi dosyalar oluşmuş, allowedHostnames nerede tutuluyor?
+echo "[start.sh] Files in $INSTANCE_DIR after onboard+patch+allowed-hostname:"
+ls -la "$INSTANCE_DIR" 2>&1 | head -20
+echo "[start.sh] Looking for hostname-related files..."
+find "$DATA_DIR" -name "*hostname*" -o -name "instance*" 2>/dev/null | head -10
+echo "[start.sh] config.json grep for hostname..."
+grep -i "hostname\|allowedHosts" "$CONFIG_PATH" 2>/dev/null | head -10
 
 # ---------------------------------------------------------------------
 # 3. Bootstrap invite URL — her deploy'da banner ile log'a bas
